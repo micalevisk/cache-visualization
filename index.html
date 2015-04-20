@@ -1,13 +1,43 @@
 <html>
 <head>
+  <!-- jQuery and Angular -->
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+  <!-- Cache Simulator -->
+  <script type="text/javascript" src="src/js/CacheSimulator.js"></script>
+  <!-- Cache Visualizer -->
   <script type="text/javascript" src="src/js/main.js"></script>
   <script type="text/javascript" src="src/js/controllers.js"></script>
+  <style type="text/css" src="src/css/main.css"></style>
 </head>
 <body>
-  <div ng-app="cacheVisualizer" ng-controller="main">
-    {{firstName}} : {{lastName}}
+  <div ng-app="cacheVisualizer" ng-controller="main" class="row">
+    <div id="controls" class="col-md-4">
+      <h2>Block Size</h2>
+      <select ng-model="blockSize" class="form-control">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="4">4</option>
+        <option value="8">8</option>
+      </select>
+
+      <h2>Cache Size</h2>
+      <input type="text" ng-model="cacheSize" class="form-control" />
+
+      <h2>Memory Addresses</h2>
+      <input type="text" ng-model="addresses" class="form-control" />
+      <input type="button" ng-click="initCache()" value="Init Cache" class="form-control" />
+    </div>
+    <div id="visualization" class="col-md-8"> 
+      <h1>Current Simulator</h1>
+      BlockSize : {{cacheSimulator.blockSize}}<BR/>
+      Cache Size : {{cacheSimulator.cacheSize}}
+    </div>
   </div>
 </body>
 </html>
