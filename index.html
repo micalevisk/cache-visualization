@@ -29,6 +29,9 @@
       <h2>Cache Size</h2>
       <input type="text" ng-model="cacheSize" class="form-control" />
 
+      <h2>Set Size</h2>
+      <input type="text" ng-model="setSize" class="form-control" />
+
       <h2>Memory Addresses</h2>
       <input type="text" ng-model="addresses" class="form-control" />
       <input type="button" ng-click="initCache()" value="Init Cache" class="form-control" />
@@ -36,7 +39,12 @@
     <div id="visualization" class="col-md-8"> 
       <h1>Current Simulator</h1>
       BlockSize : {{cacheSimulator.blockSize}}<BR/>
-      Cache Size : {{cacheSimulator.cacheSize}}
+      Cache Size : {{cacheSimulator.cacheSize}}<BR/>
+      Set Size : {{cacheSimulator.setSize}}
+      <h1> Blocks </h1>
+      <div ng-repeat="block in cacheSimulator.blocks">
+        <div>{{block.index}} : {{block.data}}</div>
+      </div>
     </div>
   </div>
 </body>
