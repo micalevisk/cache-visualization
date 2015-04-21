@@ -34,17 +34,45 @@
 
       <h2>Memory Addresses</h2>
       <input type="text" ng-model="addresses" class="form-control" />
+      <hr>
       <input type="button" ng-click="initCache()" value="Init Cache" class="form-control" />
+      <input type="button" ng-click="processAddress()" value="Process Address" class="form-control" />
     </div>
     <div id="visualization" class="col-md-8"> 
       <h1>Current Simulator</h1>
       BlockSize : {{cacheSimulator.blockSize}}<BR/>
       Cache Size : {{cacheSimulator.cacheSize}}<BR/>
       Set Size : {{cacheSimulator.setSize}}
-      <h1> Blocks </h1>
-      <div ng-repeat="block in cacheSimulator.blocks">
-        <div>{{block.index}} : {{block.data}}</div>
-      </div>
+      <h1> Sets </h1>
+      <table class="table">
+        <thead>
+          <th>ID</th>
+          <th>Blocks</th>
+          <th>LRU</th>
+        </thead>
+        <tbody>
+          <tr ng-repeat="set in cacheSimulator.sets">
+            <td>{{set.index}}</td>
+            <td>
+              <table class="table table-striped">
+                <thead>
+                  <th>ID</th>
+                  <th>tag</th>
+                  <th>data</th>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="block in set.blocks">
+                    <td>{{block.index}}</td>
+                    <td>{{block.tag}}</td>
+                    <td>{{block.data}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+            <td>{{set.lru}}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </body>
