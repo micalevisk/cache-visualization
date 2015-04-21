@@ -10,8 +10,7 @@ slightly more slides if you choose)
 
 80 points: Functionality and additional documentation
 Documentation:
-- A README suitable for future CS 351 students who want to use this tool,
-plus any information I might need to grade it
+- A README suitable for future CS 351 students who want to use this tool.
 
 **Functionality:**
 ==================
