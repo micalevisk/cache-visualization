@@ -58,7 +58,8 @@ CacheSimulator = function( cacheSize, blockSize, setSize ) {
         index : block,
         tag   : "",
         data  : data,
-        lru   : this.setSize-(block+1)
+        lru   : this.setSize-(block+1),
+        valid : 0
       });
     }
     this.sets.push( set );
@@ -87,6 +88,7 @@ CacheSimulator.prototype.resolveRequest = function( address ) {
 
   if( !hit ) {
     // Insert the data into the cache at the LRU position
+    this.sets[comps.set].blocks[this.sets[comps.set].lru].valid = 1;
     this.sets[comps.set].blocks[this.sets[comps.set].lru].tag = comps.tag;
     this.sets[comps.set].blocks[this.sets[comps.set].lru].data[comps.offset] = "*"+padLeft( decToBin(address), 32 );
   }
@@ -119,6 +121,10 @@ CacheSimulator.prototype.resolveRequest = function( address ) {
 
 }
 
+// Fills in the data array based on the address
+CacheSimulator.prototype.fillBlock = function( data, address ) {
+}
+
 CacheSimulator.prototype.getAddressComponents = function( address ) {
   var result = {
     tag : "",
@@ -132,23 +138,26 @@ CacheSimulator.prototype.getAddressComponents = function( address ) {
     bitsForBlock = powOfTwo(this.blockSize);
   result.raw = binAddress;
 
+  // Process the number of bits for the offset within a block
+  if( this.blockSize > 1 ) {
+    result.offset = parseInt( binAddress.substr( binAddress.length-bitsForBlock, bitsForBlock), 2 );
+
+    // Mutate the address to make further processing easier
+    binAddress = binAddress.substr(0, binAddress.length-bitsForBlock);
+  } else {
+    this.offset = 0;
+  }
+
   // Process the number of bits for the set
   if( numberOfSets > 1 ) {
     result.set = parseInt( binAddress.substr( binAddress.length-bitsForSet, bitsForSet), 2 );
 
-    // Mutate the address to make further processing easier
     binAddress = binAddress.substr(0, binAddress.length-bitsForSet );
   } else {
     result.set = 0;
   }
 
-  // Process the number of bits for the offset within a block
-  if( this.blockSize > 1 ) {
-    result.offset = parseInt( binAddress.substr( binAddress.length-bitsForBlock, bitsForBlock), 2 );
-    binAddress = binAddress.substr(0, binAddress.length-bitsForBlock);
-  } else {
-    this.offset = 0;
-  }
+
 
   // The rest of the address becomes the tag
   result.tag = binAddress;
