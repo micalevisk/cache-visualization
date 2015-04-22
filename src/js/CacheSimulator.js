@@ -122,21 +122,26 @@ CacheSimulator.prototype.resolveRequest = function( address ) {
 }
 
 // Fills in the data array based on the address
-CacheSimulator.prototype.fillBlock = function( data, address ) {
+CacheSimulator.prototype.fillBlock = function( dataArray, comps ) {
+  var i = 0;
+  while( i < blockSize ) {
+  }
 }
 
 CacheSimulator.prototype.getAddressComponents = function( address ) {
-  var result = {
-    tag : "",
-    offset : 0,
-    set : 0,
-    raw : ""
-  },
+  var 
     binAddress = padLeft(decToBin(address),32),
     numberOfSets = this.cacheSize/this.setSize,
     bitsForSet = powOfTwo(numberOfSets),
-    bitsForBlock = powOfTwo(this.blockSize);
-  result.raw = binAddress;
+    bitsForBlock = powOfTwo(this.blockSize),
+    result = {
+      tag : "",
+      offset : 0,
+      bitsForOffset : bitsForBlock,
+      set : bitsForSet,
+      bitsForSet : 0,
+      raw : binAddress
+    };
 
   // Process the number of bits for the offset within a block
   if( this.blockSize > 1 ) {
