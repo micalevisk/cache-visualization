@@ -1,42 +1,26 @@
-function nearestPowerOfTwo( val ) {
-  var result = 0;
-  
-  result = Math.pow(2,Math.round(Math.log(parseInt(val))/Math.log(2)));
-
-  return result;
-}
-
-function decToBin(dec) {
-    return (dec >>> 0).toString(2);
-}
-
-function padLeft(nr, n, str){
-    return Array(n-String(nr).length+1).join(str||'0')+nr;
-}
-
-function powOfTwo( val ) {
-  var result = 0;
-  result = Math.log(val)/Math.log(2);
-  return result;
-}
-
+// CacheSimulator: Simulates a cache system
+// Arthur Wuterich
+// 4/23/2015
 
 CacheSimulator = function( cacheSize, blockSize, setSize, accessTime ) {
-  if( typeof cacheSize === "undefined" || 
-      typeof blockSize === "undefined" ||
-      typeof setSize   === "undefined"   ) {
-    blockSize = 2;
-    cacheSize = 8;
-    setSize = 1;
+  if( !this.validInput( [ cacheSize, blockSize, setSize ] ) ) {
+    blockSize = 1;
+    cacheSize = 4;
+    setSize = 2;
   }
 
-  if( typeof accessTime === "undefined" ) {
-    accessTime = 0;
+  if( !this.validInput( [ accessTime ] ) ) {
+    accessTime = 10;
   }
 
+  // Attributes cacheSize, blockSize, and setSize need to be powers of 2 because
+  // we are using bit-level addressing
   this.cacheSize = nearestPowerOfTwo( cacheSize );
   this.blockSize = nearestPowerOfTwo( blockSize );
   this.setSize = nearestPowerOfTwo( setSize );
+  this.sets = []
+
+  // Time metrics ***Refactor***
   this.accessTime = accessTime;
   this.hits = 0;
   this.requests = 0;
@@ -45,7 +29,6 @@ CacheSimulator = function( cacheSize, blockSize, setSize, accessTime ) {
   if( this.setSize > this.cacheSize) {
     this.setSize = this.cacheSize;
   }
-  this.sets = []
 
   // Add the correct number of sets to the cache
   for( var setIndex = 0; setIndex < (this.cacheSize/this.setSize); setIndex++ ) {
@@ -55,8 +38,11 @@ CacheSimulator = function( cacheSize, blockSize, setSize, accessTime ) {
       blocks : [],
     }
 
+    // Add blocks to each set
     for( var block = 0; block < this.setSize; block++ ) {
       var data = [];
+
+      // Add data entries to each block
       for( var i = 0; i < this.blockSize; i++ ) {
         data.push("-");
       }
@@ -65,7 +51,7 @@ CacheSimulator = function( cacheSize, blockSize, setSize, accessTime ) {
         index : block,
         tag   : "",
         data  : data,
-        lru   : this.setSize-(block+1),
+        lru   : this.setSize-(block+1), // Hidden LRU for the set 
         valid : 0
       });
     }
@@ -74,6 +60,22 @@ CacheSimulator = function( cacheSize, blockSize, setSize, accessTime ) {
 
 }
 
+CacheSimulator.prototype.validInput = function( args ) {
+  var result = true;
+
+  for( var arg in args ) {
+    arg = args[arg];
+    if( typeof arg === "undefined" || parseInt(arg) === NaN ) {
+      result = false;
+      break;
+    }
+  }
+
+  return result;
+}
+
+// Resolve a memory access
+// This will set the cache state if the address is not contained within
 CacheSimulator.prototype.resolveRequest = function( address ) {
   var comps = this.getAddressComponents( address ),
       hit = false,
@@ -93,10 +95,13 @@ CacheSimulator.prototype.resolveRequest = function( address ) {
     }
   }
 
+  // If we failed to find the data then add the request to the cache
   if( !hit ) {
     // Insert the data into the cache at the LRU position
     this.sets[comps.set].blocks[this.sets[comps.set].lru].valid = 1;
     this.sets[comps.set].blocks[this.sets[comps.set].lru].tag = comps.tag;
+
+    // Fill the block if there are more than one element
     if( this.blockSize > 1 ) {
       this.fillBlock( this.sets[comps.set].blocks[this.sets[comps.set].lru].data, comps );
     } else {
@@ -104,6 +109,8 @@ CacheSimulator.prototype.resolveRequest = function( address ) {
     }
   }
   
+  // If we hit then update the LURs based on the hit LRU making the hit block have LRU=0 and blocks with
+  // LRU<hitLRU => LRU+=1
   var oldBlockLru = hit?hitLru:this.sets[comps.set].blocks[this.sets[comps.set].lru].lru;
 
   // Set the new LRUs for the blocks
@@ -133,6 +140,8 @@ CacheSimulator.prototype.fillBlock = function( dataArray, comps ) {
   var i = 0,
       entries = Math.pow( 2, comps.bitsForOffset ),
       higherOrderBits = comps.raw.substr( 0, 32-comps.bitsForOffset);
+
+  // For each entry add the correct memory address to pull data from
   while( i < entries ) {
     var value = higherOrderBits + padLeft( decToBin( i ), comps.bitsForOffset );
     dataArray[i] = "*"+parseInt( value, 2 );
@@ -141,19 +150,18 @@ CacheSimulator.prototype.fillBlock = function( dataArray, comps ) {
 }
 
 CacheSimulator.prototype.getAddressComponents = function( address ) {
-  var 
-    binAddress = padLeft(decToBin(address),32),
-    numberOfSets = this.cacheSize/this.setSize,
-    bitsForSet = powOfTwo(numberOfSets),
-    bitsForBlock = powOfTwo(this.blockSize),
-    result = {
-      tag : "",
-      offset : 0,
-      bitsForOffset : bitsForBlock,
-      set : bitsForSet,
-      bitsForSet : bitsForSet,
-      raw : binAddress
-    };
+  var binAddress = padLeft(decToBin(address),32),
+      numberOfSets = this.cacheSize/this.setSize,
+      bitsForSet = powOfTwo(numberOfSets),
+      bitsForBlock = powOfTwo(this.blockSize),
+      result = {
+        tag : "",
+        offset : 0,
+        bitsForOffset : bitsForBlock,
+        set : bitsForSet,
+        bitsForSet : bitsForSet,
+        raw : binAddress
+      };
 
   // Process the number of bits for the offset within a block
   if( this.blockSize > 1 ) {
@@ -173,8 +181,6 @@ CacheSimulator.prototype.getAddressComponents = function( address ) {
   } else {
     result.set = 0;
   }
-
-
 
   // The rest of the address becomes the tag
   result.tag = binAddress;

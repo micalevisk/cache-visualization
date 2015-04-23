@@ -1,8 +1,15 @@
+<!DOCTYPE html>
+<!-- 
+  HTML Driver for the CacheSimulator
+  Arthur Wuterich
+  4/23/2015
+-->
 <html>
 <head>
   <!-- jQuery and Angular -->
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
+
   <!-- Bootstrap -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
@@ -11,7 +18,8 @@
   <!-- Cache Simulator -->
   <script type="text/javascript" src="src/js/TieredCache.js"></script>
   <script type="text/javascript" src="src/js/CacheSimulator.js"></script>
-  <!-- Cache Visualizer -->
+
+  <!-- Cache Visualizer through AngularJS -->
   <script type="text/javascript" src="src/js/main.js"></script>
   <script type="text/javascript" src="src/js/controllers.js"></script>
   <link rel="stylesheet" type="text/css" href="src/css/main.css">
@@ -19,35 +27,17 @@
 <body>
   <div ng-app="cacheVisualizer" ng-controller="main" class="row">
     <div id="controls" class="col-md-4">
-      <!--
-      <h2>Block Size</h2>
-      <select ng-model="blockSize" class="form-control">
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="4">4</option>
-        <option value="8">8</option>
-        <option value="16">16</option>
-      </select>
-
-      <h2>Cache Size</h2>
-      <input type="text" ng-model="cacheSize" class="form-control" />
-
-      <h2>Set Size</h2>
-      <input type="text" ng-model="setSize" class="form-control" />
-
-      -->
       <h2>Address Sequence</h2>
       <input type="text" ng-model="addresses" class="form-control" />
       <hr>
-      <input type="button" ng-click="initCache()" value="Add New Cache to Stack" class="form-control" />
-      <input type="button" ng-click="processAddress()" value="Process Address" class="form-control" />
+      <input type="button" ng-click="processAddress()" value="Process Addresses" class="form-control" />
       <input type="button" ng-click="randomRequestToggle()" value="Toggle Random Requests" class="form-control" />
       <hr>
       <div class="memoryOverview">
         <h1>Memory Overview</h1>
         <div class="cacheControls">
-          <button ng-click="clearCache()" class="btn btn-default">Update Cache</button>
-          <button ng-click="clearCache()" class="btn btn-default">Clear Cache</button>
+          <input type="button" ng-click="initCache()" value="Add New Cache to Stack" class="btn btn-default" />
+          <input type="button" ng-click="clearCache()" value="Update and Clear Cache" class="btn btn-default" />
         </div>
         <div class="memoryOverviewLevel" ng-repeat="cacheSimulator in tieredCache.cacheLevels">
           <h2>L{{$index+1}} Cache</h2> 
@@ -59,13 +49,15 @@
               <th>Block Size</th>
               <th>Cache Size</th>
               <th>Set Size</th>
+              <th>Access Time(ms)</th>
               <th>Hit Rate</th>
             </thead>
             <tbody>
               <tr>
-                <td><input type="text" ng-model="tieredCache.cacheLevels[$index].blockSize"></td>
-                <td><input type="text" ng-model="tieredCache.cacheLevels[$index].cacheSize"></td>
-                <td><input type="text" ng-model="tieredCache.cacheLevels[$index].setSize"></td>
+                <td><input type="text" class="form-control" ng-model="tieredCache.cacheLevels[$index].blockSize"></td>
+                <td><input type="text" class="form-control" ng-model="tieredCache.cacheLevels[$index].cacheSize"></td>
+                <td><input type="text" class="form-control" ng-model="tieredCache.cacheLevels[$index].setSize"></td>
+                <td><input type="text" class="form-control" ng-model="tieredCache.cacheLevels[$index].accessTime"></td>
                 <td>{{cacheSimulator.hits}}/{{cacheSimulator.requests}}</td>
               </tr>
             </tbody>
@@ -74,14 +66,24 @@
         <div class="memoryOverviewLevel">
           <h2>Main Memory</h2>
           <div class="mainMemoryControls">
-            Access Time: <input type="text" ng-model="tieredCache.memoryAccessTime">
+            <table class="table">
+              <thead>
+                <th>Access Time(ms)</th>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><input type="text" class="form-control" ng-model="tieredCache.memoryAccessTime"></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
     </div>
     <div id="visualization" class="col-md-8"> 
+      <!-- View for each CacheSimulator -->
       <div class="cacheSimulator" ng-repeat="cacheSimulator in tieredCache.cacheLevels" id="cacheLevel{{$index}}">
-        <h2>L{{$index+1}} Cache</h2>
+        <h2 class="cacheLevel">L{{$index+1}} Cache</h2>
 
         <table class="table">
           <thead>
