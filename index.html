@@ -34,11 +34,17 @@
       <input type="button" ng-click="randomRequestToggle()" value="Toggle Random Requests" class="form-control" />
       <hr>
       <div class="memoryOverview">
-        <h1>Memory Overview</h1>
-        <div class="cacheControls">
-          <input type="button" ng-click="initCache()" value="Add New Cache to Stack" class="btn btn-default" />
-          <input type="button" ng-click="clearCache()" value="Update and Clear Cache" class="btn btn-default" />
-        </div>
+        <table>
+          <tr>
+            <td>
+              <h1>Memory Overview</h1>
+            </td>
+            <td>
+              <input type="button" ng-click="initCache()" value="Add New Cache to Stack" class="btn btn-default" />
+              <input type="button" ng-click="clearCache()" value="Update and Clear Cache" class="btn btn-default" />
+            </td>
+          </tr>
+        </table>
         <div class="memoryOverviewLevel" ng-repeat="cacheSimulator in tieredCache.cacheLevels">
           <h2>L{{$index+1}} Cache</h2> 
           <div class="cacheControls">

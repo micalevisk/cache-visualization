@@ -25,10 +25,6 @@ th.tag {
   clear: both;
 }
 
-.memoryOverview> h1 {
-  float: left;
-}
-
 .cacheControls {
   float: right;
   position: relative;

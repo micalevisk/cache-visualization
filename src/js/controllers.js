@@ -17,12 +17,15 @@ app.controller('main', function($scope) {
   };
 
   $scope.processAddress = function() {
-    if( $scope.addresses.length ) {
-      console.log( "Process the provided address: ", $scope.addresses );
-      $scope.tieredCache.resolveRequest( $scope.addresses );
+    if( $scope.addresses.length && $scope.tieredCache ) {
+      var addresses = $scope.addresses.split( " " );
+      if( parseInt(addresses[0]) !== NaN ) {
+        console.log( "Process the provided address: ", addresses[0] );
+        $scope.tieredCache.resolveRequest( addresses[0] );
+      } 
+      addresses.shift();
+      $scope.addresses = addresses.join(" ");
     }
-
-    $scope.addresses = "";
   };
 
   $scope.clearCacheLevel = function( level ) {
