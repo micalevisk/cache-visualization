@@ -1,3 +1,40 @@
 th.tag {
   width : 300px;
 }
+
+.row {
+  margin: 0px;
+}
+
+.cacheSimulator {
+  padding: 3px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.memoryOverviewLevel {
+  text-align: center;
+  margin-bottom: 10px;
+  border: 1px solid #BBB;
+  padding: 10px;
+  clear: both;
+}
+
+.memoryOverviewLevel > h2 {
+  float: left;
+  clear: both;
+}
+
+.memoryOverview> h1 {
+  float: left;
+}
+
+.cacheControls {
+  float: right;
+  position: relative;
+  top: 22px;
+}
+
+.mainMemoryControls {
+  clear: both;
+}

@@ -21,18 +21,25 @@ function powOfTwo( val ) {
 }
 
 
-CacheSimulator = function( cacheSize, blockSize, setSize ) {
+CacheSimulator = function( cacheSize, blockSize, setSize, accessTime ) {
   if( typeof cacheSize === "undefined" || 
       typeof blockSize === "undefined" ||
       typeof setSize   === "undefined"   ) {
-    blockSize = 1;
+    blockSize = 2;
     cacheSize = 8;
     setSize = 1;
+  }
+
+  if( typeof accessTime === "undefined" ) {
+    accessTime = 0;
   }
 
   this.cacheSize = nearestPowerOfTwo( cacheSize );
   this.blockSize = nearestPowerOfTwo( blockSize );
   this.setSize = nearestPowerOfTwo( setSize );
+  this.accessTime = accessTime;
+  this.hits = 0;
+  this.requests = 0;
 
   // Clamp the setSize to be within the maximum blocksize
   if( this.setSize > this.cacheSize) {
@@ -71,7 +78,8 @@ CacheSimulator.prototype.resolveRequest = function( address ) {
   var comps = this.getAddressComponents( address ),
       hit = false,
       hitLru = 0;
-  console.log( address, comps );
+
+  this.requests++;
 
   // Check to see if the data is within the block by comparing tags from each block in the set
   for( var block in this.sets[comps.set].blocks ) {
@@ -79,7 +87,6 @@ CacheSimulator.prototype.resolveRequest = function( address ) {
 
     // Hit!
     if( block.tag == comps.tag ) {
-      console.log( "**HIT**: Found the data at: ", comps );
       hit = true;
       hitLru = block.lru;
       break;
@@ -90,21 +97,16 @@ CacheSimulator.prototype.resolveRequest = function( address ) {
     // Insert the data into the cache at the LRU position
     this.sets[comps.set].blocks[this.sets[comps.set].lru].valid = 1;
     this.sets[comps.set].blocks[this.sets[comps.set].lru].tag = comps.tag;
-    this.sets[comps.set].blocks[this.sets[comps.set].lru].data[comps.offset] = "*"+padLeft( decToBin(address), 32 );
+    if( this.blockSize > 1 ) {
+      this.fillBlock( this.sets[comps.set].blocks[this.sets[comps.set].lru].data, comps );
+    } else {
+      this.sets[comps.set].blocks[this.sets[comps.set].lru].data[comps.offset] = "*"+address;
+    }
   }
   
-  // Fill in the correcy data block
-  // Fill in the rest of the data-block if blocksize>1
+  var oldBlockLru = hit?hitLru:this.sets[comps.set].blocks[this.sets[comps.set].lru].lru;
 
-  // Update LRU for the entire set
-  // Find the lru value that has been altered
-  var oldBlockLru = this.sets[comps.set].blocks[this.sets[comps.set].lru].lru;
-
-  if( hit ) {
-    oldBlockLru = hitLru;
-  }
-
-  // Set the new LRUs for the block
+  // Set the new LRUs for the blocks
   for( var blockIndex in this.sets[comps.set].blocks ) {
     var block = this.sets[comps.set].blocks[blockIndex];
 
@@ -119,12 +121,22 @@ CacheSimulator.prototype.resolveRequest = function( address ) {
     }
   }
 
+  if( hit ) {
+    this.hits++;
+  }
+
+  return hit;
 }
 
 // Fills in the data array based on the address
 CacheSimulator.prototype.fillBlock = function( dataArray, comps ) {
-  var i = 0;
-  while( i < blockSize ) {
+  var i = 0,
+      entries = Math.pow( 2, comps.bitsForOffset ),
+      higherOrderBits = comps.raw.substr( 0, 32-comps.bitsForOffset);
+  while( i < entries ) {
+    var value = higherOrderBits + padLeft( decToBin( i ), comps.bitsForOffset );
+    dataArray[i] = "*"+parseInt( value, 2 );
+    i++;
   }
 }
 
@@ -139,7 +151,7 @@ CacheSimulator.prototype.getAddressComponents = function( address ) {
       offset : 0,
       bitsForOffset : bitsForBlock,
       set : bitsForSet,
-      bitsForSet : 0,
+      bitsForSet : bitsForSet,
       raw : binAddress
     };
 

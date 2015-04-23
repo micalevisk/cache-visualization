@@ -9,6 +9,7 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
   <!-- Cache Simulator -->
+  <script type="text/javascript" src="src/js/TieredCache.js"></script>
   <script type="text/javascript" src="src/js/CacheSimulator.js"></script>
   <!-- Cache Visualizer -->
   <script type="text/javascript" src="src/js/main.js"></script>
@@ -18,12 +19,14 @@
 <body>
   <div ng-app="cacheVisualizer" ng-controller="main" class="row">
     <div id="controls" class="col-md-4">
+      <!--
       <h2>Block Size</h2>
       <select ng-model="blockSize" class="form-control">
         <option value="1">1</option>
         <option value="2">2</option>
         <option value="4">4</option>
         <option value="8">8</option>
+        <option value="16">16</option>
       </select>
 
       <h2>Cache Size</h2>
@@ -32,50 +35,86 @@
       <h2>Set Size</h2>
       <input type="text" ng-model="setSize" class="form-control" />
 
-      <h2>Memory Addresses</h2>
+      -->
+      <h2>Address Sequence</h2>
       <input type="text" ng-model="addresses" class="form-control" />
       <hr>
-      <input type="button" ng-click="initCache()" value="Init Cache" class="form-control" />
+      <input type="button" ng-click="initCache()" value="Add New Cache to Stack" class="form-control" />
       <input type="button" ng-click="processAddress()" value="Process Address" class="form-control" />
       <input type="button" ng-click="randomRequestToggle()" value="Toggle Random Requests" class="form-control" />
+      <hr>
+      <div class="memoryOverview">
+        <h1>Memory Overview</h1>
+        <div class="cacheControls">
+          <button ng-click="clearCache()" class="btn btn-default">Update Cache</button>
+          <button ng-click="clearCache()" class="btn btn-default">Clear Cache</button>
+        </div>
+        <div class="memoryOverviewLevel" ng-repeat="cacheSimulator in tieredCache.cacheLevels">
+          <h2>L{{$index+1}} Cache</h2> 
+          <div class="cacheControls">
+            <button ng-click="removeCacheLevel($index)" class="btn btn-default">Remove</button>
+          </div>
+          <table class="table">
+            <thead>
+              <th>Block Size</th>
+              <th>Cache Size</th>
+              <th>Set Size</th>
+              <th>Hit Rate</th>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="text" ng-model="tieredCache.cacheLevels[$index].blockSize"></td>
+                <td><input type="text" ng-model="tieredCache.cacheLevels[$index].cacheSize"></td>
+                <td><input type="text" ng-model="tieredCache.cacheLevels[$index].setSize"></td>
+                <td>{{cacheSimulator.hits}}/{{cacheSimulator.requests}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="memoryOverviewLevel">
+          <h2>Main Memory</h2>
+          <div class="mainMemoryControls">
+            Access Time: <input type="text" ng-model="tieredCache.memoryAccessTime">
+          </div>
+        </div>
+      </div>
     </div>
     <div id="visualization" class="col-md-8"> 
-      <h1>Current Simulator</h1>
-      BlockSize : {{cacheSimulator.blockSize}}<BR/>
-      Cache Size : {{cacheSimulator.cacheSize}}<BR/>
-      Set Size : {{cacheSimulator.setSize}}
-      <h1> Sets </h1>
-      <table class="table">
-        <thead>
-          <th>ID</th>
-          <th>Blocks</th>
-        </thead>
-        <tbody>
-          <tr ng-repeat="set in cacheSimulator.sets">
-            <td>{{set.index}}</td>
-            <td>
-              <table class="table table-striped">
-                <thead>
-                  <th class="id">ID</th>
-                  <th class="tag">tag</th>
-                  <th class="data">data</th>
-                  <th class="lru">LRU</th>
-                  <th class="valid">valid</th>
-                </thead>
-                <tbody>
-                  <tr ng-repeat="block in set.blocks">
-                    <td>{{block.index}}</td>
-                    <td>{{block.tag}}</td>
-                    <td>{{block.data}}</td>
-                    <td>{{block.lru}}</td>
-                    <td>{{block.valid}}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="cacheSimulator" ng-repeat="cacheSimulator in tieredCache.cacheLevels" id="cacheLevel{{$index}}">
+        <h2>L{{$index+1}} Cache</h2>
+
+        <table class="table">
+          <thead>
+            <th>Set ID</th>
+            <th>Blocks</th>
+          </thead>
+          <tbody>
+            <tr ng-repeat="set in cacheSimulator.sets">
+              <td>{{set.index}}</td>
+              <td>
+                <table class="table table-striped">
+                  <thead>
+                    <th class="id">Block ID</th>
+                    <th class="tag">tag</th>
+                    <th class="data">data</th>
+                    <th class="lru">LRU</th>
+                    <th class="valid">valid</th>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="block in set.blocks">
+                      <td>{{block.index}}</td>
+                      <td>{{block.tag}}</td>
+                      <td>{{block.data}}</td>
+                      <td>{{block.lru}}</td>
+                      <td>{{block.valid}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </body>
