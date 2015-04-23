@@ -8,7 +8,7 @@ app.controller('main', function($scope) {
   $scope.blockSize = 4;
   $scope.setSize   = 2;
   $scope.addresses = "";
-  $scope.randomAccessesHandle = 0;
+  $scope.repeatHandle = 0;
   $scope.tieredCache = new TieredCache( new CacheSimulator(), 100 );
 
   // Event handlers
@@ -16,16 +16,22 @@ app.controller('main', function($scope) {
     $scope.tieredCache.addCacheLevel( new CacheSimulator() );
   };
 
-  $scope.processAddress = function() {
+  $scope.processAddress = function(wrap) {
     if( $scope.addresses.length && $scope.tieredCache ) {
       var addresses = $scope.addresses.split( " " );
       if( parseInt(addresses[0]) !== NaN ) {
         console.log( "Process the provided address: ", addresses[0] );
         $scope.tieredCache.resolveRequest( addresses[0] );
       } 
-      addresses.shift();
+      if( wrap ) {
+        addresses.push( addresses.shift() );
+      } else {
+        addresses.shift();
+      }
+
       $scope.addresses = addresses.join(" ");
     }
+
   };
 
   $scope.clearCacheLevel = function( level ) {
@@ -40,6 +46,18 @@ app.controller('main', function($scope) {
     $scope.tieredCache.removeLevel( level );
   };
 
+  $scope.repeatAddressSequence = function() {
+    if( $scope.repeatHandle != 0 ) {
+      clearInterval( $scope.repeatHandle );
+      $scope.repeatHandle = 0;
+    } else {
+      $scope.repeatHandle = setInterval( function() {
+        $scope.processAddress(true);
+        $scope.$apply();
+      }, 100 );
+    }
+  }
+
   $scope.randomRequest = function() {
     var max32 = Math.pow(2, 32) - 1;
     var address = Math.floor(Math.random() * max32);
@@ -47,11 +65,11 @@ app.controller('main', function($scope) {
   };
 
   $scope.randomRequestToggle = function() {
-    if( $scope.randomAccessesHandle != 0 ) {
+    if( $scope.repeatHandle != 0 ) {
       clearInterval( $scope.randomAccessesHandle );
       $scope.randomAccessesHandle = 0;
     } else {
-      $scope.randomAccessesHandle = setInterval( function() {
+      $scope.repeatHandle = setInterval( function() {
         $scope.randomRequest();
         $scope.$apply();
       }, 50 );

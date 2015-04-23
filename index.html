@@ -31,7 +31,7 @@
       <input type="text" ng-model="addresses" class="form-control" />
       <hr>
       <input type="button" ng-click="processAddress()" value="Process Addresses" class="form-control" />
-      <input type="button" ng-click="randomRequestToggle()" value="Toggle Random Requests" class="form-control" />
+      <input type="button" ng-click="repeatAddressSequence()" value="Repeat Address Sequence" class="form-control" />
       <hr>
       <div class="memoryOverview">
         <table>
@@ -64,7 +64,7 @@
                 <td><input type="text" class="form-control" ng-model="tieredCache.cacheLevels[$index].cacheSize"></td>
                 <td><input type="text" class="form-control" ng-model="tieredCache.cacheLevels[$index].setSize"></td>
                 <td><input type="text" class="form-control" ng-model="tieredCache.cacheLevels[$index].accessTime"></td>
-                <td>{{cacheSimulator.hits}}/{{cacheSimulator.requests}}</td>
+                <td>{{(cacheSimulator.hits/cacheSimulator.requests).toFixed(4)}}</td>
               </tr>
             </tbody>
           </table>
