@@ -115,8 +115,9 @@ CacheSimulator.prototype.resolveRequest = function( address, nextCacheLevels ) {
       this.fillBlock( this.sets[comps.set].blocks[this.sets[comps.set].lru].data, comps, nextCacheLevels );
     } else {
       this.sets[comps.set].blocks[this.sets[comps.set].lru].data[comps.offset] = "*"+address;
+
+      // If there is a next cache level send off a request for the data
       if( nextCacheLevels.length > 0 ) {
-        // If there is a next cache level send off a request for the data
         nextCacheLevels[0].resolveRequest( address, nextCacheLevels.slice(1) );
       }
     }
@@ -148,7 +149,7 @@ CacheSimulator.prototype.resolveRequest = function( address, nextCacheLevels ) {
   return hit;
 }
 
-// Fills in the data array based on the address
+// Fills in the data array based on the address while making subsequent requests to lower cache levels if available
 CacheSimulator.prototype.fillBlock = function( dataArray, comps, nextCacheLevels ) {
   var i = 0,
       entries = Math.pow( 2, comps.bitsForOffset ),
