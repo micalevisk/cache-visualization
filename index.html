@@ -6,6 +6,7 @@
 -->
 <html>
 <head>
+  <title>SSU Cache Simulator</title>
   <!-- jQuery and Angular -->
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
@@ -93,8 +94,8 @@
       <div class="cacheSimulator" ng-repeat="cacheSimulator in tieredCache.cacheLevels" id="cacheLevel{{$index}}">
         <h2 class="cacheLevel">L{{$index+1}} Cache({{cacheDescription($index)}})</h2>
 
-        <!-- Set associative and Fully Associative -->
-        <table ng-hide="cacheSimulator.setSize==1" class="table">
+        <!-- Set Associative -->
+        <table ng-hide="cacheSimulator.setSize==1||cacheSimulator.setSize==cacheSimulator.cacheSize" class="table">
           <thead>
             <th>Set ID</th>
             <th>Blocks</th>
@@ -106,10 +107,10 @@
                 <table class="table table-striped">
                   <thead>
                     <th class="id">Block ID</th>
-                    <th class="tag">tag</th>
-                    <th class="data">data</th>
+                    <th class="tag">Tag</th>
+                    <th class="data">Data</th>
                     <th class="lru">LRU</th>
-                    <th class="valid">valid</th>
+                    <th class="valid">Valid</th>
                   </thead>
                   <tbody>
                     <tr ng-repeat="block in set.blocks">
@@ -126,8 +127,28 @@
           </tbody>
         </table>
 
+        <!-- Fully Associative -->
+        <table ng-hide="cacheSimulator.setSize==1||cacheSimulator.setSize!=cacheSimulator.cacheSize" class="table table-striped">
+          <thead>
+            <th>Block ID</th>
+            <th>Tag</th>
+            <th>Data</th>
+            <th>LRU</th>
+            <th>Valid</th>
+          </thead>
+          <tbody>
+            <tr ng-repeat="block in cacheSimulator.sets[0].blocks">
+              <td>{{block.index}}</td>
+              <td>{{block.tag}}</td>
+              <td>{{block.data}}</td>
+              <td>{{block.lru}}</td>
+              <td>{{block.valid}}</td>
+            </tr>
+          </tbody>
+        </table>
+
         <!-- Direct Mapped -->
-        <table ng-hide="cacheSimulator.setSize!=1" class="table table-striped">
+        <table ng-hide="cacheSimulator.setSize!=1||cacheSimulator.setSize==cacheSimulator.cacheSize" class="table table-striped">
           <thead>
             <th>Block ID</th>
             <th>Tag</th>
