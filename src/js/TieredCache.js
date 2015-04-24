@@ -43,13 +43,19 @@ TieredCache.prototype.resolveRequest = function( address ) {
   if( this.cacheLevels.length == 0 ) {
     return this.memoryAccessTime;
   }
+  
+  var accessTime = 0;
+
+  this.cacheLevels[0].resolveRequest( address, this.cacheLevels.slice(1) );
+
+  /*
 
   var cacheLevel = 0,
       cacheToTest = this.cacheLevels[cacheLevel],
       accessTime = this.cacheLevels[cacheLevel++];
 
-  // Test each cache level
-  while( !cacheToTest.resolveRequest( address ) ) {
+  // Test each cache level and pass the next cache level for block level requests
+  while( !cacheToTest.resolveRequest( address, this.cacheLevels[cacheLevel] ) ) {
     // Pull the next cache to test
     cacheToTest = this.cacheLevels[cacheLevel];
 
@@ -62,7 +68,7 @@ TieredCache.prototype.resolveRequest = function( address ) {
       accessTime += this.cacheTimes[cacheLevel++];
     }
   }
-
+  */
   return accessTime;
   
 }

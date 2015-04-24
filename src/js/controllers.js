@@ -43,11 +43,19 @@ app.controller('main', function($scope) {
     var cacheSimulator = $scope.tieredCache.cacheLevels[index],
         result = "";
 
-    // Fully Associative
-    if( cacheSimulator.setSize == cacheSimulator.cacheSize ) {
+    // Edge case when we only have a single block
+    if( cacheSimulator.setSize == cacheSimulator.cacheSize && cacheSimulator.cacheSize == cacheSimulator.blockSize && cacheSimulator.setSize == 1 ) {
+      result = "Direct Mapped";
+
+    // When we have a set size of the cache size this is fully associative
+    } else if( cacheSimulator.setSize == cacheSimulator.cacheSize ) {
       result = "Fully Associative";
+
+    // If the setSize is not 1 and not equal to the cache size then we are n-way set accociative
     } else if( cacheSimulator.setSize != 1 ) {
       result = cacheSimulator.setSize + "-Way Set Associative";
+
+    // If our setSize is 1 then we are direct mapped
     } else {
       result = "Direct Mapped";
     }

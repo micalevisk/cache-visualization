@@ -85,7 +85,7 @@ CacheSimulator.prototype.validInput = function( args ) {
 
 // Resolve a memory access
 // This will set the cache state if the address is not contained within
-CacheSimulator.prototype.resolveRequest = function( address ) {
+CacheSimulator.prototype.resolveRequest = function( address, nextCacheLevels ) {
   var comps = this.getAddressComponents( address ),
       hit = false,
       hitLru = 0;
@@ -112,9 +112,13 @@ CacheSimulator.prototype.resolveRequest = function( address ) {
 
     // Fill the block if there are more than one element
     if( this.blockSize > 1 ) {
-      this.fillBlock( this.sets[comps.set].blocks[this.sets[comps.set].lru].data, comps );
+      this.fillBlock( this.sets[comps.set].blocks[this.sets[comps.set].lru].data, comps, nextCacheLevels );
     } else {
       this.sets[comps.set].blocks[this.sets[comps.set].lru].data[comps.offset] = "*"+address;
+      if( nextCacheLevels.length > 0 ) {
+        // If there is a next cache level send off a request for the data
+        nextCacheLevels[0].resolveRequest( address, nextCacheLevels.slice(1) );
+      }
     }
   }
   
@@ -145,7 +149,7 @@ CacheSimulator.prototype.resolveRequest = function( address ) {
 }
 
 // Fills in the data array based on the address
-CacheSimulator.prototype.fillBlock = function( dataArray, comps ) {
+CacheSimulator.prototype.fillBlock = function( dataArray, comps, nextCacheLevels ) {
   var i = 0,
       entries = Math.pow( 2, comps.bitsForOffset ),
       higherOrderBits = comps.raw.substr( 0, this.bitsForAddresses-comps.bitsForOffset);
@@ -153,8 +157,12 @@ CacheSimulator.prototype.fillBlock = function( dataArray, comps ) {
   // For each entry add the correct memory address to pull data from
   while( i < entries ) {
     var value = higherOrderBits + padLeft( decToBin( i ), comps.bitsForOffset );
-    dataArray[i] = "*"+parseInt( value, 2 );
-    i++;
+    dataArray[i++] = "*"+parseInt( value, 2 );
+
+    // If there is a next cache level send off a request for the data
+    if( nextCacheLevels.length ) {
+      nextCacheLevels[0].resolveRequest( parseInt( value, 2 ), nextCacheLevels.slice(1) );
+    }
   }
 }
 
