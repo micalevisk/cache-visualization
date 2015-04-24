@@ -32,7 +32,7 @@ TieredCache.prototype.clear = function() {
 TieredCache.prototype.clearLevel = function( level ) {
   if( typeof this.cacheLevels[level] !== "undefined" ) {
     var cacheSimulator = this.cacheLevels[level];
-    this.cacheLevels[level] = new CacheSimulator( cacheSimulator.cacheSize, cacheSimulator.blockSize, cacheSimulator.setSize, cacheSimulator.accessTime );
+    this.cacheLevels[level] = new CacheSimulator( cacheSimulator.external.cacheSize, cacheSimulator.external.blockSize, cacheSimulator.external.setSize, cacheSimulator.external.accessTime );
   }
 }
 

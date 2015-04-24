@@ -41,6 +41,18 @@ th.tag {
   background-color:#eee;
 }
 
+input {
+  margin-top:5px;
+}
+
+.table {
+  margin-bottom: 0px;
+}
+
+.cacheSimulator * .table>tbody>tr>td, .cacheSimulator * .table>tbody>tr, .cacheSimulator * .table>thead>th{
+  padding: 0px;
+  margin: 0px;
+}
 
 
 

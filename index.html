@@ -28,10 +28,12 @@
   <div ng-app="cacheVisualizer" ng-controller="main" class="row">
     <div id="controls" class="col-md-4">
       <h2>Address Sequence</h2>
-      <input type="text" ng-model="addresses" class="form-control" />
+      <input type="text" ng-model="addresses" class="form-control" ng-disabled="repeatHandle!=0" />
       <hr>
-      <input type="button" ng-click="processAddress()" value="Process Addresses" class="form-control" />
-      <input type="button" ng-click="repeatAddressSequence()" value="Repeat Address Sequence" class="form-control" />
+      <input type="button" ng-click="processAddress()" ng-disabled="repeatHandle!=0" value="Process Address" class="form-control" />
+      <h3>Repeat Speed</h3>
+      <input type="range" ng-model="repeatSpeed" name="Repeat Speed" min="1" max="1000">
+      <input type="button" ng-click="repeatAddressSequence()" value="{{repeatHandle==0?'Repeat Addresses':'Stop Repeating Addresses'}}" class="form-control" />
       <hr>
       <div class="memoryOverview">
         <table>
@@ -60,11 +62,11 @@
             </thead>
             <tbody>
               <tr>
-                <td><input type="text" class="form-control" ng-model="tieredCache.cacheLevels[$index].blockSize"></td>
-                <td><input type="text" class="form-control" ng-model="tieredCache.cacheLevels[$index].cacheSize"></td>
-                <td><input type="text" class="form-control" ng-model="tieredCache.cacheLevels[$index].setSize"></td>
-                <td><input type="text" class="form-control" ng-model="tieredCache.cacheLevels[$index].accessTime"></td>
-                <td>{{(cacheSimulator.hits/cacheSimulator.requests).toFixed(4)}}</td>
+                <td><input type="text" class="form-control" ng-model="tieredCache.cacheLevels[$index].external.blockSize"></td>
+                <td><input type="text" class="form-control" ng-model="tieredCache.cacheLevels[$index].external.cacheSize"></td>
+                <td><input type="text" class="form-control" ng-model="tieredCache.cacheLevels[$index].external.setSize"></td>
+                <td><input type="text" class="form-control" ng-model="tieredCache.cacheLevels[$index].external.accessTime"></td>
+                <td>{{cacheSimulator.formatHitRate()}}</td>
               </tr>
             </tbody>
           </table>
@@ -89,12 +91,12 @@
     <div id="visualization" class="col-md-8"> 
       <!-- View for each CacheSimulator -->
       <div class="cacheSimulator" ng-repeat="cacheSimulator in tieredCache.cacheLevels" id="cacheLevel{{$index}}">
-        <h2 class="cacheLevel">L{{$index+1}} Cache</h2>
+        <h2 class="cacheLevel">L{{$index+1}} Cache({{cacheDescription($index)}})</h2>
 
         <table class="table">
           <thead>
-            <th>Set ID</th>
-            <th>Blocks</th>
+            <th>{{cacheSimulator.setSize>1?"Set ID":"Block ID"}}</th>
+            <th>{{cacheSimulator.setSize>1?"Blocks":""}}</th>
           </thead>
           <tbody>
             <tr ng-repeat="set in cacheSimulator.sets">
@@ -102,18 +104,18 @@
               <td>
                 <table class="table table-striped">
                   <thead>
-                    <th class="id">Block ID</th>
+                    <th ng-hide="cacheSimulator.setSize==1" class="id">Block ID</th>
                     <th class="tag">tag</th>
                     <th class="data">data</th>
-                    <th class="lru">LRU</th>
+                    <th ng-hide="cacheSimulator.setSize==1" class="lru">LRU</th>
                     <th class="valid">valid</th>
                   </thead>
                   <tbody>
                     <tr ng-repeat="block in set.blocks">
-                      <td>{{block.index}}</td>
+                      <td ng-hide="cacheSimulator.setSize==1">{{block.index}}</td>
                       <td>{{block.tag}}</td>
                       <td>{{block.data}}</td>
-                      <td>{{block.lru}}</td>
+                      <td ng-hide="cacheSimulator.setSize==1">{{block.lru}}</td>
                       <td>{{block.valid}}</td>
                     </tr>
                   </tbody>

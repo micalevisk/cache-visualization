@@ -25,6 +25,14 @@ CacheSimulator = function( cacheSize, blockSize, setSize, accessTime ) {
   this.hits = 0;
   this.requests = 0;
 
+  // Setup external variables for modifications
+  this.external = {
+    blockSize : this.blockSize,
+    cacheSize : this.cacheSize,
+    setSize : this.setSize,
+    accessTime : this.accessTime
+  }
+
   // Clamp the setSize to be within the maximum blocksize
   if( this.setSize > this.cacheSize) {
     this.setSize = this.cacheSize;
@@ -147,6 +155,16 @@ CacheSimulator.prototype.fillBlock = function( dataArray, comps ) {
     dataArray[i] = "*"+parseInt( value, 2 );
     i++;
   }
+}
+
+CacheSimulator.prototype.formatHitRate = function() {
+  var result = "0.00%";
+
+  if( this.requests != 0 ) {
+    result = ((this.hits / this.requests)*100).toFixed(2)+"%";
+  }
+
+  return result;
 }
 
 CacheSimulator.prototype.getAddressComponents = function( address ) {

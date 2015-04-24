@@ -9,6 +9,7 @@ app.controller('main', function($scope) {
   $scope.setSize   = 2;
   $scope.addresses = "";
   $scope.repeatHandle = 0;
+  $scope.repeatSpeed = 100;
   $scope.tieredCache = new TieredCache( new CacheSimulator(), 100 );
 
   // Event handlers
@@ -20,7 +21,6 @@ app.controller('main', function($scope) {
     if( $scope.addresses.length && $scope.tieredCache ) {
       var addresses = $scope.addresses.split( " " );
       if( parseInt(addresses[0]) !== NaN ) {
-        console.log( "Process the provided address: ", addresses[0] );
         $scope.tieredCache.resolveRequest( addresses[0] );
       } 
       if( wrap ) {
@@ -38,6 +38,22 @@ app.controller('main', function($scope) {
     $scope.tieredCache.clearLevel( level );
   };
 
+  $scope.cacheDescription = function( index ) {
+    var cacheSimulator = $scope.tieredCache.cacheLevels[index],
+        result = "";
+
+    // Fully Associative
+    if( cacheSimulator.setSize == cacheSimulator.cacheSize ) {
+      result = "Fully Associative";
+    } else if( cacheSimulator.setSize != 1 ) {
+      result = cacheSimulator.setSize + "-Way Set Associative";
+    } else {
+      result = "Direct Mapped";
+    }
+
+    return result;
+  }
+
   $scope.clearCache= function() {
     $scope.tieredCache.clear();
   };
@@ -48,31 +64,16 @@ app.controller('main', function($scope) {
 
   $scope.repeatAddressSequence = function() {
     if( $scope.repeatHandle != 0 ) {
-      clearInterval( $scope.repeatHandle );
+      clearTimeout( $scope.repeatHandle );
       $scope.repeatHandle = 0;
     } else {
-      $scope.repeatHandle = setInterval( function() {
+      $scope.repeatHandle = setTimeout( function() {
         $scope.processAddress(true);
         $scope.$apply();
-      }, 100 );
+        $scope.repeatHandle = 0;
+        $scope.repeatAddressSequence();
+      }, $scope.repeatSpeed);
     }
   }
 
-  $scope.randomRequest = function() {
-    var max32 = Math.pow(2, 32) - 1;
-    var address = Math.floor(Math.random() * max32);
-    $scope.tieredCache.resolveRequest( address );
-  };
-
-  $scope.randomRequestToggle = function() {
-    if( $scope.repeatHandle != 0 ) {
-      clearInterval( $scope.randomAccessesHandle );
-      $scope.randomAccessesHandle = 0;
-    } else {
-      $scope.repeatHandle = setInterval( function() {
-        $scope.randomRequest();
-        $scope.$apply();
-      }, 50 );
-    }
-  };
 });
