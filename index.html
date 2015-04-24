@@ -93,10 +93,11 @@
       <div class="cacheSimulator" ng-repeat="cacheSimulator in tieredCache.cacheLevels" id="cacheLevel{{$index}}">
         <h2 class="cacheLevel">L{{$index+1}} Cache({{cacheDescription($index)}})</h2>
 
-        <table class="table">
+        <!-- Set associative and Fully Associative -->
+        <table ng-hide="cacheSimulator.setSize==1" class="table">
           <thead>
-            <th>{{cacheSimulator.setSize>1?"Set ID":"Block ID"}}</th>
-            <th>{{cacheSimulator.setSize>1?"Blocks":""}}</th>
+            <th>Set ID</th>
+            <th>Blocks</th>
           </thead>
           <tbody>
             <tr ng-repeat="set in cacheSimulator.sets">
@@ -104,23 +105,41 @@
               <td>
                 <table class="table table-striped">
                   <thead>
-                    <th ng-hide="cacheSimulator.setSize==1" class="id">Block ID</th>
+                    <th class="id">Block ID</th>
                     <th class="tag">tag</th>
                     <th class="data">data</th>
-                    <th ng-hide="cacheSimulator.setSize==1" class="lru">LRU</th>
+                    <th class="lru">LRU</th>
                     <th class="valid">valid</th>
                   </thead>
                   <tbody>
                     <tr ng-repeat="block in set.blocks">
-                      <td ng-hide="cacheSimulator.setSize==1">{{block.index}}</td>
+                      <td>{{block.index}}</td>
                       <td>{{block.tag}}</td>
                       <td>{{block.data}}</td>
-                      <td ng-hide="cacheSimulator.setSize==1">{{block.lru}}</td>
+                      <td>{{block.lru}}</td>
                       <td>{{block.valid}}</td>
                     </tr>
                   </tbody>
                 </table>
               </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Direct Mapped -->
+        <table ng-hide="cacheSimulator.setSize!=1" class="table">
+          <thead>
+            <th>Block ID</th>
+            <th>Tag</th>
+            <th>Data</th>
+            <th>Valid</th>
+          </thead>
+          <tbody>
+            <tr ng-repeat="set in cacheSimulator.sets">
+              <td>{{set.index}}</td>
+              <td>{{set.blocks[0].tag}}</td>
+              <td>{{set.blocks[0].data}}</td>
+              <td>{{set.blocks[0].valid}}</td>
             </tr>
           </tbody>
         </table>

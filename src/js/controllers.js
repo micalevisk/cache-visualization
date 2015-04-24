@@ -19,7 +19,8 @@ app.controller('main', function($scope) {
 
   $scope.processAddress = function(wrap) {
     if( $scope.addresses.length && $scope.tieredCache ) {
-      var addresses = $scope.addresses.split( " " );
+      // Splits based on spaces and filters each element to remove non-digits
+      var addresses = $scope.addresses.split(" ").map( function(ele){ return ele.replace(/\D/g,''); } );
       if( parseInt(addresses[0]) !== NaN ) {
         $scope.tieredCache.resolveRequest( addresses[0] );
       } 

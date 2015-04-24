@@ -18,6 +18,7 @@ CacheSimulator = function( cacheSize, blockSize, setSize, accessTime ) {
   this.cacheSize = nearestPowerOfTwo( cacheSize );
   this.blockSize = nearestPowerOfTwo( blockSize );
   this.setSize = nearestPowerOfTwo( setSize );
+  this.bitsForAddresses = 32;
   this.sets = []
 
   // Time metrics ***Refactor***
@@ -147,7 +148,7 @@ CacheSimulator.prototype.resolveRequest = function( address ) {
 CacheSimulator.prototype.fillBlock = function( dataArray, comps ) {
   var i = 0,
       entries = Math.pow( 2, comps.bitsForOffset ),
-      higherOrderBits = comps.raw.substr( 0, 32-comps.bitsForOffset);
+      higherOrderBits = comps.raw.substr( 0, this.bitsForAddresses-comps.bitsForOffset);
 
   // For each entry add the correct memory address to pull data from
   while( i < entries ) {
@@ -168,7 +169,7 @@ CacheSimulator.prototype.formatHitRate = function() {
 }
 
 CacheSimulator.prototype.getAddressComponents = function( address ) {
-  var binAddress = padLeft(decToBin(address),32),
+  var binAddress = padLeft(decToBin(address),this.bitsForAddresses),
       numberOfSets = this.cacheSize/this.setSize,
       bitsForSet = powOfTwo(numberOfSets),
       bitsForBlock = powOfTwo(this.blockSize),
