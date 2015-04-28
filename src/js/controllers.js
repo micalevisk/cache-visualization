@@ -19,11 +19,13 @@ app.controller('main', function($scope) {
 
   $scope.processAddress = function(wrap) {
     if( $scope.addresses.length && $scope.tieredCache ) {
+
       // Splits based on spaces and filters each element to remove non-digits
       var addresses = $scope.addresses.split(" ").map( function(ele){ return ele.replace(/\D/g,''); } );
       if( parseInt(addresses[0]) !== NaN ) {
         $scope.tieredCache.resolveRequest( addresses[0] );
       } 
+
       if( wrap ) {
         addresses.push( addresses.shift() );
       } else {
@@ -47,7 +49,7 @@ app.controller('main', function($scope) {
     if( cacheSimulator.setSize == cacheSimulator.cacheSize && cacheSimulator.cacheSize == cacheSimulator.blockSize && cacheSimulator.setSize == 1 ) {
       result = "Direct Mapped";
 
-    // When we have a set size of the cache size this is fully associative
+    // When we have a set size = cache size this is fully associative
     } else if( cacheSimulator.setSize == cacheSimulator.cacheSize ) {
       result = "Fully Associative";
 
@@ -71,11 +73,15 @@ app.controller('main', function($scope) {
     $scope.tieredCache.removeLevel( level );
   };
 
+  // Click event for repeating the processAddress function
   $scope.repeatAddressSequence = function() {
+
+    // If we have a repeat handle then clear the repeat
     if( $scope.repeatHandle != 0 ) {
       clearTimeout( $scope.repeatHandle );
       $scope.repeatHandle = 0;
     } else {
+      // Setup the repeat handle for process address
       $scope.repeatHandle = setTimeout( function() {
         $scope.processAddress(true);
         $scope.$apply();
