@@ -1,3 +1,4 @@
+// Global application 
 app = angular.module('cacheVisualizer', []);
 
 // Utility functions
