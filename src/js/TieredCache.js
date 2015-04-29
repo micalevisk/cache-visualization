@@ -4,14 +4,12 @@
 
 TieredCache = function( initalCache, memoryAccessTime ) {
   this.cacheLevels = [ initalCache ];
-  this.cacheTimes = [ initalCache.accessTime ];
   this.memoryAccessTime = memoryAccessTime;
 }
 
 // Pushes a cache level onto the cache stack
 TieredCache.prototype.addCacheLevel = function( cacheSimulator ) {
   this.cacheLevels.push( cacheSimulator );
-  this.cacheTimes.push( cacheSimulator.accessTime );
 }
 
 // Remove an arbitrary level from the cache stack 
@@ -32,6 +30,8 @@ TieredCache.prototype.clear = function() {
 TieredCache.prototype.clearLevel = function( level ) {
   if( typeof this.cacheLevels[level] !== "undefined" ) {
     var cacheSimulator = this.cacheLevels[level];
+
+    // Create a new cache simulator for the block using the external variables
     this.cacheLevels[level] = new CacheSimulator( cacheSimulator.external.cacheSize, cacheSimulator.external.blockSize, cacheSimulator.external.setSize, cacheSimulator.external.accessTime );
   }
 }
@@ -39,36 +39,11 @@ TieredCache.prototype.clearLevel = function( level ) {
 // Resolve a memory request by querying the lowest level caches first and sequentially 
 // querying the next higher level(s).
 TieredCache.prototype.resolveRequest = function( address ) {
+
   // If we do not have any cache levels then every request will access main memory
-  if( this.cacheLevels.length == 0 ) {
-    return this.memoryAccessTime;
+  // else send the request to the first cache level which will handle calling the 
+  // lower cache levels for the data if needed
+  if( this.cacheLevels.length != 0 ) {
+    this.cacheLevels[0].resolveRequest( address, this.cacheLevels.slice(1) );
   }
-  
-  var accessTime = 0;
-
-  this.cacheLevels[0].resolveRequest( address, this.cacheLevels.slice(1) );
-
-  /*
-
-  var cacheLevel = 0,
-      cacheToTest = this.cacheLevels[cacheLevel],
-      accessTime = this.cacheLevels[cacheLevel++];
-
-  // Test each cache level and pass the next cache level for block level requests
-  while( !cacheToTest.resolveRequest( address, this.cacheLevels[cacheLevel] ) ) {
-    // Pull the next cache to test
-    cacheToTest = this.cacheLevels[cacheLevel];
-
-    // If true we have went through all caches => Main Memory access
-    if( typeof cacheToTest === "undefined" )  {
-      // Memory access
-      accessTime += this.memoryAccessTime;
-      break;
-    } else {
-      accessTime += this.cacheTimes[cacheLevel++];
-    }
-  }
-  */
-  return accessTime;
-  
 }
