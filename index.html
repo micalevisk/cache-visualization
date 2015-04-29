@@ -58,8 +58,8 @@
           </div>
           <table class="table">
             <thead>
+              <th>Number of Blocks</th>
               <th>Block Size</th>
-              <th>Cache Size</th>
               <th>Set Size</th>
               <th>Access Time(ns)</th>
               <th>Hit Rate</th>
@@ -70,8 +70,8 @@
                   This method of accessing the simulator data is ugly but we need to have a direct mapping to
                   cache simulator's external attributes to allow changes to update.
                 -->
-                <td><input type="text" class="form-control" ng-model="tieredCache.cacheLevels[$index].external.blockSize"></td>
                 <td><input type="text" class="form-control" ng-model="tieredCache.cacheLevels[$index].external.cacheSize"></td>
+                <td><input type="text" class="form-control" ng-model="tieredCache.cacheLevels[$index].external.blockSize"></td>
                 <td><input type="text" class="form-control" ng-model="tieredCache.cacheLevels[$index].external.setSize"></td>
                 <td><input type="text" class="form-control" ng-model="tieredCache.cacheLevels[$index].external.accessTime"></td>
                 <td>{{formattedHitRate($index)}}</td>
