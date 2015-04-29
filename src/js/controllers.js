@@ -4,19 +4,18 @@
 
 app.controller('main', function($scope) {
   // Init main controller
-  $scope.cacheSize = 8;
-  $scope.blockSize = 4;
-  $scope.setSize   = 2;
   $scope.addresses = "";
   $scope.repeatHandle = 0;
   $scope.repeatSpeed = 100;
   $scope.tieredCache = new TieredCache( new CacheSimulator(), 100 );
 
-  // Event handlers
+  // Adds a new cache level to the bottom of the tieredCache object
   $scope.initCache = function() {
     $scope.tieredCache.addCacheLevel( new CacheSimulator() );
   };
 
+  // Processes the left-most address in the addresses string
+  // [wrap]: If truthy then place the processed address on the end of the address string
   $scope.processAddress = function(wrap) {
     if( $scope.addresses.length && $scope.tieredCache ) {
 
@@ -37,10 +36,8 @@ app.controller('main', function($scope) {
 
   };
 
-  $scope.clearCacheLevel = function( level ) {
-    $scope.tieredCache.clearLevel( level );
-  };
-
+  // Cache type formatting
+  // Returns the type of the cache based on the configuration of the cache.
   $scope.cacheDescription = function( index ) {
     var cacheSimulator = $scope.tieredCache.cacheLevels[index],
         result = "";
@@ -54,6 +51,8 @@ app.controller('main', function($scope) {
     return result;
   }
 
+  // Formatting for hit rate
+  // Returns the hit rate for a given cache level formatted to 2 decimal places
   $scope.formattedHitRate = function(index) {
     var result = "0.00%",
         cacheSimulator = $scope.tieredCache.cacheLevels[index];
@@ -65,21 +64,37 @@ app.controller('main', function($scope) {
     return result;
   };
 
+  // Formatting for block data
+  // Returns the data array without quotes if there are multiple elements
+  // Returns the first element if there is only one element
   $scope.renderBlockData = function( data ) {
-    var result = "[ ";
+    var result = "";
 
-    for( var ele in data ) {
-      if( ele == data.length-1 ) {
-        result += data[ele]+" ]";
+    if( data ) {
+      // Single data element should not have the array braces EX: *1
+      if( data.length == 1 ) {
+        result = data[0];
       } else {
-        result += data[ele]+", ";
+        // Wrap a data array with multiple elements with array braces EX: [ *1, *2 ]
+        result = "[ ";
+        for( var ele in data ) {
+          if( ele == data.length-1 ) {
+            result += data[ele]+" ]";
+          } else {
+            result += data[ele]+", ";
+          }
+        }
       }
     }
 
     return result;
   };
 
-  $scope.clearCache= function() {
+  $scope.clearCacheLevel = function( level ) {
+    $scope.tieredCache.clearLevel( level );
+  };
+
+  $scope.clearCache = function() {
     $scope.tieredCache.clear();
   };
 
@@ -95,10 +110,14 @@ app.controller('main', function($scope) {
       clearTimeout( $scope.repeatHandle );
       $scope.repeatHandle = 0;
     } else {
-      // Setup the repeat handle for process address
+      // Setup the repeat handle for process address. We use setTimeout over setInterval to allow the 
+      // interval slider to have dynamic effect
       $scope.repeatHandle = setTimeout( function() {
+        // Process the address with wrapping
         $scope.processAddress(true);
         $scope.$apply();
+
+        // Reapply the repeat handle
         $scope.repeatHandle = 0;
         $scope.repeatAddressSequence();
       }, $scope.repeatSpeed);
