@@ -42,5 +42,22 @@ The left column allows you to configure the simulator:
 * Address Sequence: Defines a sequence of memory addresses. You can define multiple addresses ( EX: 1, 20, 13 ) using space delimited values.
 * Process Address Button: Will take the left-most address in the Address Sequence and process it with the given cache.
 * Repeat Addresses and Repeat Speed: Will repeat the address sequence provided. After each address is processed the address will be placed on the end of the address sequence. This allows you to run a sequence of addresses continuously. The Repeat Speed slider controls how fast the simulator will process the addresses [ 1ms - 1000ms ]
+* Add New Cache to Stack: This will place a new cache level on the bottom of the current cache stack. 
+* Update and Clear Cache: Clears all of the cache levels as well as updating their attributes
 
+Each cache level will have their own set of attributes:
+* Number of Blocks: The number of blocks.
+* Block Size: The size of the data block.
+* Set Size: The number of blocks in a set.
+* Access Time: The time in ns that the cache will take to resolve a request.
+* Hit Rate: Display of the % hitrate for the cache level
+
+By manipulating the Number of Blocks, Block Size, and Set Size you will be able to configure a cache into one of three categories:
+* Direct Mapped: By setting the Set Size to 1 this will create a direct mapped cache.
+* n-way Set Associative: By setting the Set Size within the range: ( 1, NumberOfBlocks ) will create a n-Way Set Associative cache.
+* Fully Associative: By setting the Set Size to the number of blocks this will create a Fully Associative cache.
+
+
+Implementation
+==============
 
