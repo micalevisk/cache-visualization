@@ -21,12 +21,13 @@ CacheSimulator = function( cacheSize, blockSize, setSize, accessTime ) {
   this.bitsForAddresses = 32;
   this.sets = []
 
-  // Time metrics ***Refactor***
+  // Time metrics
   this.accessTime = accessTime;
   this.hits = 0;
   this.requests = 0;
 
-  // Setup external variables for modifications
+  // Setup external variables for modifications. The view controller will connect to these values to allow
+  // the user to modify the cache attributes without directly effecting the simulators behavior
   this.external = {
     blockSize : this.blockSize,
     cacheSize : this.cacheSize,
@@ -39,7 +40,7 @@ CacheSimulator = function( cacheSize, blockSize, setSize, accessTime ) {
     this.setSize = this.cacheSize;
   }
 
-  // Add the correct number of sets to the cache
+  // Add sets to the simulator based on cacheSize/setSize
   for( var setIndex = 0; setIndex < (this.cacheSize/this.setSize); setIndex++ ) {
     var set = {
       index  : setIndex,
@@ -69,6 +70,8 @@ CacheSimulator = function( cacheSize, blockSize, setSize, accessTime ) {
 
 }
 
+// Checks each element of the args array for being defined and not NaN
+// Returns false if either of these conditions are found on any element of the array
 CacheSimulator.prototype.validInput = function( args ) {
   var result = true;
 
@@ -84,13 +87,11 @@ CacheSimulator.prototype.validInput = function( args ) {
 }
 
 // Resolve a memory access
-// This will set the cache state if the address is not contained within
-CacheSimulator.prototype.resolveRequest = function( address, nextCacheLevels ) {
+CacheSimulator.prototype.resolveRequest = function( address, nextCacheLevels, ignoreHit ) {
   var comps = this.getAddressComponents( address ),
       hit = false,
       hitLru = 0;
 
-  this.requests++;
 
   // Check to see if the data is within the block by comparing tags from each block in the set
   for( var block in this.sets[comps.set].blocks ) {
@@ -141,9 +142,13 @@ CacheSimulator.prototype.resolveRequest = function( address, nextCacheLevels ) {
       this.sets[comps.set].lru = blockIndex;
     }
   }
-
-  if( hit ) {
-    this.hits++;
+  
+  // if ignoreHit is Falsy then recorde the hit statistics
+  if( !ignoreHit ) {
+    this.requests++;
+    if( hit ) {
+      this.hits++;
+    }
   }
 
   return hit;
@@ -153,7 +158,8 @@ CacheSimulator.prototype.resolveRequest = function( address, nextCacheLevels ) {
 CacheSimulator.prototype.fillBlock = function( dataArray, comps, nextCacheLevels ) {
   var i = 0,
       entries = Math.pow( 2, comps.bitsForOffset ),
-      higherOrderBits = comps.raw.substr( 0, this.bitsForAddresses-comps.bitsForOffset);
+      higherOrderBits = comps.raw.substr( 0, this.bitsForAddresses-comps.bitsForOffset),
+      ignore = false;
 
   // For each entry add the correct memory address to pull data from
   while( i < entries ) {
@@ -161,8 +167,10 @@ CacheSimulator.prototype.fillBlock = function( dataArray, comps, nextCacheLevels
     dataArray[i++] = "*"+parseInt( value, 2 );
 
     // If there is a next cache level send off a request for the data
+    // ignore will get set to true which will only allow the lower level to recognize a single hit ( for hit-rate correctness )
     if( nextCacheLevels.length ) {
-      nextCacheLevels[0].resolveRequest( parseInt( value, 2 ), nextCacheLevels.slice(1) );
+      nextCacheLevels[0].resolveRequest( parseInt( value, 2 ), nextCacheLevels.slice(1), ignore );
+      ignore = true;
     }
   }
 }

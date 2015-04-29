@@ -166,7 +166,7 @@
             <tr ng-repeat="set in cacheSimulator.sets">
               <td>{{set.index}}</td>
               <td>{{set.blocks[0].tag}}</td>
-              <td>{{renderBlockData(block.data)}}</td>
+              <td>{{renderBlockData(set.blocks[0].data)}}</td>
               <td>{{set.blocks[0].valid}}</td>
             </tr>
           </tbody>
