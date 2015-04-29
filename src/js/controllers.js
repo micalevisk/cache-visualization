@@ -45,25 +45,39 @@ app.controller('main', function($scope) {
     var cacheSimulator = $scope.tieredCache.cacheLevels[index],
         result = "";
 
-    // Edge case when we only have a single block
-    if( cacheSimulator.setSize == cacheSimulator.cacheSize && cacheSimulator.cacheSize == cacheSimulator.blockSize && cacheSimulator.setSize == 1 ) {
-      result = "Direct Mapped";
-
-    // When we have a set size = cache size this is fully associative
-    } else if( cacheSimulator.setSize == cacheSimulator.cacheSize ) {
-      result = "Fully Associative";
-
-    // If the setSize is not 1 and not equal to the cache size then we are n-way set accociative
-    } else if( cacheSimulator.setSize != 1 ) {
-      result = cacheSimulator.setSize + "-Way Set Associative";
-
-    // If our setSize is 1 then we are direct mapped
-    } else {
-      result = "Direct Mapped";
+    switch( cacheSimulator.cacheType() ) {
+      case 0: result = cacheSimulator.setSize + "-Way Set Associative"; break;
+      case 1: result = "Fully Associative"; break;
+      case 2: result = "Direct Mapped"; break;
     }
 
     return result;
   }
+
+  $scope.formattedHitRate = function(index) {
+    var result = "0.00%",
+        cacheSimulator = $scope.tieredCache.cacheLevels[index];
+
+    if( cacheSimulator.requests != 0 ) {
+      result = ((cacheSimulator.hits / cacheSimulator.requests)*100).toFixed(2)+"%";
+    }
+
+    return result;
+  };
+
+  $scope.renderBlockData = function( data ) {
+    var result = "[ ";
+
+    for( var ele in data ) {
+      if( ele == data.length-1 ) {
+        result += data[ele]+" ]";
+      } else {
+        result += data[ele]+", ";
+      }
+    }
+
+    return result;
+  };
 
   $scope.clearCache= function() {
     $scope.tieredCache.clear();

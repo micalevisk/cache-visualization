@@ -167,16 +167,35 @@ CacheSimulator.prototype.fillBlock = function( dataArray, comps, nextCacheLevels
   }
 }
 
-CacheSimulator.prototype.formatHitRate = function() {
-  var result = "0.00%";
+// Returns the type of the cache:
+// 0 : n-way set associative
+// 1 : Fully Associative
+// 2 : Direct Mapped
+CacheSimulator.prototype.cacheType = function() {
+  var cacheSimulator = this,
+      result = 0;
 
-  if( this.requests != 0 ) {
-    result = ((this.hits / this.requests)*100).toFixed(2)+"%";
+  // Edge case when we only have a single block
+  if( cacheSimulator.cacheSize == 1 ) {
+    result = 2;
+
+  // When we have a set size = cache size this is fully associative
+  } else if( cacheSimulator.setSize == cacheSimulator.cacheSize ) {
+    result = 1;
+
+  // If the setSize is not 1 and not equal to the cache size then we are n-way set accociative
+  } else if( cacheSimulator.setSize != 1 ) {
+    result = 0;
+
+  // If our setSize is 1 then we are direct mapped
+  } else {
+    result = 2;
   }
 
   return result;
 }
 
+// Returns the components of a provided address
 CacheSimulator.prototype.getAddressComponents = function( address ) {
   var binAddress = padLeft(decToBin(address),this.bitsForAddresses),
       numberOfSets = this.cacheSize/this.setSize,
@@ -186,7 +205,7 @@ CacheSimulator.prototype.getAddressComponents = function( address ) {
         tag : "",
         offset : 0,
         bitsForOffset : bitsForBlock,
-        set : bitsForSet,
+        set : 0,
         bitsForSet : bitsForSet,
         raw : binAddress
       };
@@ -197,17 +216,13 @@ CacheSimulator.prototype.getAddressComponents = function( address ) {
 
     // Mutate the address to make further processing easier
     binAddress = binAddress.substr(0, binAddress.length-bitsForBlock);
-  } else {
-    this.offset = 0;
   }
 
-  // Process the number of bits for the set
+  // Process the set
   if( numberOfSets > 1 ) {
     result.set = parseInt( binAddress.substr( binAddress.length-bitsForSet, bitsForSet), 2 );
 
     binAddress = binAddress.substr(0, binAddress.length-bitsForSet );
-  } else {
-    result.set = 0;
   }
 
   // The rest of the address becomes the tag
