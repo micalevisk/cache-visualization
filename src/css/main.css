@@ -54,6 +54,15 @@ input {
   margin: 0px;
 }
 
+.right {
+  float: right;
+  margin-left:10px;
+}
+
+.memoryOverviewButton {
+  position: relative;
+  top: 16px;
+}
 
 
 

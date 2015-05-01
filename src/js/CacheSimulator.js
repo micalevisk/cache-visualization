@@ -44,7 +44,7 @@ CacheSimulator = function( cacheSize, blockSize, setSize, accessTime ) {
   for( var setIndex = 0; setIndex < (this.cacheSize/this.setSize); setIndex++ ) {
     var set = {
       index  : setIndex,
-      lru    : 0,
+      lru    : 0, // Hidden LRU for the set
       blocks : [],
     }
 
@@ -61,8 +61,10 @@ CacheSimulator = function( cacheSize, blockSize, setSize, accessTime ) {
         index : block,
         tag   : "",
         data  : data,
-        lru   : this.setSize-(block+1), // Hidden LRU for the set 
-        valid : 0
+        lru   : this.setSize-(block+1),
+        address : 0,
+        valid : 0,
+        dirty : 0
       });
     }
     this.sets.push( set );
@@ -88,9 +90,10 @@ CacheSimulator.prototype.validInput = function( args ) {
 
 // Resolve a memory access
 CacheSimulator.prototype.resolveRequest = function( address, nextCacheLevels, ignoreHit ) {
-  var comps = this.getAddressComponents( address ),
+  var comps = this.getAddressComponents( parseInt( address ) ),
       hit = false,
       hitLru = 0;
+      result = false;
 
 
   // Check to see if the data is within the block by comparing tags from each block in the set
@@ -99,27 +102,41 @@ CacheSimulator.prototype.resolveRequest = function( address, nextCacheLevels, ig
 
     // Hit!
     if( block.tag == comps.tag ) {
-      hit = true;
+      hit = result = true;
       hitLru = block.lru;
+
+      if( /w/g.test( address ) ) {
+        block.dirty = 1;
+      }
+
       break;
     }
   }
 
   // If we failed to find the data then add the request to the cache
   if( !hit ) {
-    // Insert the data into the cache at the LRU position
-    this.sets[comps.set].blocks[this.sets[comps.set].lru].valid = 1;
-    this.sets[comps.set].blocks[this.sets[comps.set].lru].tag = comps.tag;
+    var block = this.sets[comps.set].blocks[this.sets[comps.set].lru];
+
+    // If the block is valid and dirty then send a write request to the lower level if available
+    if( block.valid && block.dirty && nextCacheLevels.length ) {
+      nextCacheLevels[0].resolveRequest( block.address+"w", nextCacheLevels.slice(1), true );
+    }
+
+    // Write the data to the block
+    block.dirty = 0;
+    block.valid = 1;
+    block.address = parseInt( address );
+    block.tag = comps.tag;
 
     // Fill the block if there are more than one element
     if( this.blockSize > 1 ) {
-      this.fillBlock( this.sets[comps.set].blocks[this.sets[comps.set].lru].data, comps, nextCacheLevels );
+      result = this.fillBlock( block.data, comps, nextCacheLevels );
     } else {
-      this.sets[comps.set].blocks[this.sets[comps.set].lru].data[comps.offset] = "*"+address;
+      block.data[comps.offset] = "*"+parseInt(address);
 
       // If there is a next cache level send off a request for the data
       if( nextCacheLevels.length > 0 ) {
-        nextCacheLevels[0].resolveRequest( address, nextCacheLevels.slice(1) );
+        result = nextCacheLevels[0].resolveRequest( address, nextCacheLevels.slice(1) );
       }
     }
   }
@@ -143,7 +160,7 @@ CacheSimulator.prototype.resolveRequest = function( address, nextCacheLevels, ig
     }
   }
   
-  // if ignoreHit is Falsy then recorde the hit statistics
+  // if ignoreHit is Falsy then record the hit statistics
   if( !ignoreHit ) {
     this.requests++;
     if( hit ) {
@@ -151,7 +168,7 @@ CacheSimulator.prototype.resolveRequest = function( address, nextCacheLevels, ig
     }
   }
 
-  return hit;
+  return result;
 }
 
 // Fills in the data array based on the address while making subsequent requests to lower cache levels if available
@@ -159,7 +176,8 @@ CacheSimulator.prototype.fillBlock = function( dataArray, comps, nextCacheLevels
   var i = 0,
       entries = Math.pow( 2, comps.bitsForOffset ),
       higherOrderBits = comps.raw.substr( 0, this.bitsForAddresses-comps.bitsForOffset),
-      ignore = false;
+      ignore = false,
+      result = false;
 
   // For each entry add the correct memory address to pull data from
   while( i < entries ) {
@@ -169,10 +187,15 @@ CacheSimulator.prototype.fillBlock = function( dataArray, comps, nextCacheLevels
     // If there is a next cache level send off a request for the data
     // ignore will get set to true which will only allow the lower level to recognize a single hit ( for hit-rate correctness )
     if( nextCacheLevels.length ) {
-      nextCacheLevels[0].resolveRequest( parseInt( value, 2 ), nextCacheLevels.slice(1), ignore );
+      var hit = nextCacheLevels[0].resolveRequest( parseInt( value, 2 ), nextCacheLevels.slice(1), ignore );
+      if( hit ) {
+        result = hit;
+      }
       ignore = true;
     }
   }
+
+  return result;
 }
 
 // Returns the type of the cache:

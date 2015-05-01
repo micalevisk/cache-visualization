@@ -9,27 +9,22 @@ app.controller('main', function($scope) {
   $scope.repeatSpeed = 100;
   $scope.tieredCache = new TieredCache( new CacheSimulator(), 100 );
 
-  // Adds a new cache level to the bottom of the tieredCache object
-  $scope.initCache = function() {
-    $scope.tieredCache.addCacheLevel( new CacheSimulator() );
-  };
 
   // Processes the left-most address in the addresses string
   // [wrap]: If truthy then place the processed address on the end of the address string
-  $scope.processAddress = function(wrap) {
+  $scope.processAddress = function() {
     if( $scope.addresses.length && $scope.tieredCache ) {
 
-      // Splits based on spaces and filters each element to remove non-digits
-      var addresses = $scope.addresses.split(" ").map( function(ele){ return ele.replace(/\D/g,''); } );
-      if( parseInt(addresses[0]) !== NaN ) {
-        $scope.tieredCache.resolveRequest( addresses[0] );
-      } 
+      // Splits based on spaces and filters each element to the parseInt interpretation with the correct write flag
+      var addresses = $scope.addresses.split(" ").map( function(ele){ return /w/g.test(ele)?parseInt(ele)+"w":parseInt(ele); } );
 
-      if( wrap ) {
+      // Remove empty elements and elements that could not be converted to an integer
+      addresses = _.reject( addresses, function(ele){ return isNaN(parseInt(ele))||ele===""||ele<0; } );
+
+      if( addresses.length ) {
+        $scope.tieredCache.resolveRequest( addresses[0] );
         addresses.push( addresses.shift() );
-      } else {
-        addresses.shift();
-      }
+      } 
 
       $scope.addresses = addresses.join(" ");
     }
@@ -49,13 +44,32 @@ app.controller('main', function($scope) {
     }
 
     return result;
-  }
+  };
+
+  $scope.averageAccessTime = function() {
+    var result = "0ns";
+
+    if( $scope.tieredCache ) {
+      var avg = $scope.tieredCache.averageAccessTime();
+
+      if( !isNaN(avg) ) {
+        result = avg.toFixed(2)+"ns";
+      }
+    }
+
+    return result;
+  };
 
   // Formatting for hit rate
   // Returns the hit rate for a given cache level formatted to 2 decimal places
   $scope.formattedHitRate = function(index) {
     var result = "0.00%",
         cacheSimulator = $scope.tieredCache.cacheLevels[index];
+
+    // Default to the global tieredCache if the simulator was undefined
+    if( typeof cacheSimulator === "undefined" ) {
+      cacheSimulator = $scope.tieredCache;
+    }
 
     if( cacheSimulator.requests != 0 ) {
       result = ((cacheSimulator.hits / cacheSimulator.requests)*100).toFixed(2)+"%";
@@ -95,10 +109,30 @@ app.controller('main', function($scope) {
   };
 
   $scope.clearCache = function() {
+
+    // Clear the repeat timer
+    clearTimeout( $scope.repeatHandle );
+    $scope.repeatHandle = 0;
+
     $scope.tieredCache.clear();
   };
 
+  // Adds a new cache level to the bottom of the tieredCache object
+  $scope.initCache = function() {
+
+    // Clear the repeat timer
+    clearTimeout( $scope.repeatHandle );
+    $scope.repeatHandle = 0;
+
+    $scope.tieredCache.addCacheLevel( new CacheSimulator() );
+  };
+
+
   $scope.removeCacheLevel = function( level ) {
+    // Clear the repeat timer
+    clearTimeout( $scope.repeatHandle );
+    $scope.repeatHandle = 0;
+
     $scope.tieredCache.removeLevel( level );
   };
 
