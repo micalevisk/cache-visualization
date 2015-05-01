@@ -64,6 +64,10 @@ input {
   top: 16px;
 }
 
+.overall {
+  font-weight: bold;
+  border-top: 4px solid #DDD;
+}
 
 
 
