@@ -66,15 +66,14 @@ By manipulating the Number of Blocks, Block Size, and Set Size you will be able 
 
 Implementation
 ==============
-**Cache Simulator**:
-The simulator mainly revolves around two seperate objects:
-* CacheSimulator(): Responsible for modeling a single level of a cache. The prototype pattern is used to define cache simulators in the following manner: ``` var simulator = new CacheSimulator( {Cache Size}, {Block Size}, {Set Size}, {Access Time} ); ``` which will create a new cache simulator.
+**Cache Simulator**: Responsible for modeling a single level of a cache. 
+* CacheSimulator(): The prototype pattern is used to define cache simulators in the following manner: ``` var simulator = new CacheSimulator( {Cache Size}, {Block Size}, {Set Size}, {Access Time} ); ``` which will create a new cache simulator.
 * CacheSimulator.resolveRequest( address, [nextCacheLevels], [ignoreHit] ): This will do a memory request on the given cache for the provided address. If the cache evicts dirty data, or does not have the requested data then a request to the next cache level defined on the array nextCacheLevels. ignoreHit will disable the recording of a hit/miss for the request. This is used when Block Size > 1 for populating the complete block.
 * CacheSimulator.cacheType(): Returns the type of the cache: 0 = n-Way Set Associative, 1 = Fully Associative, 2 = Direct Mapped.
 * CacheSimulator.getAddressComponents( address ): Returns an dictionary with the following attributes: tag, offset, set, raw. Each attribute will be the correct for the cache object.
 
-**Tiered Cache**:
-* TieredCache(): Responsible for modeling a collection of cache levels. The prototype pattern is used to define tiered caches in the following manner: ``` var tieredCache = new TieredCache( initalCache, memoryAccessTime ); ``` which will define a Tiered Cache with a single L1 level. The default main memory access time, provided by memoryAccessTime, is the time penalty for the entire Tiered Cache missing and having to access main memory.
+**Tiered Cache**: Responsible for modeling a collection of cache levels.
+* TieredCache(): The prototype pattern is used to define tiered caches in the following manner: ``` var tieredCache = new TieredCache( initalCache, memoryAccessTime ); ``` which will define a Tiered Cache with a single L1 level. The default main memory access time, provided by memoryAccessTime, is the time penalty for the entire Tiered Cache missing and having to access main memory.
 * TieredCache.addCacheLevel( cacheSimulator ): This will push a new cache simulator on the bottom of the Tiered Cache stack.
 * TieredCache.removeLevel( index ): Will remove a cache level at the provided stack index.
 * TieredCache.clear(): This will reset the entire Tiered Cache and each cache level.
@@ -82,13 +81,11 @@ The simulator mainly revolves around two seperate objects:
 * TieredCache.clearLevel( index ): Will clear the cache for the index on the cache stack.
 * TieredCache.resolveRequest( address ): Will attempt to resolve the memory request on the given cache stack. This will call the resolveRequest function for the first given cache on the cache stack. Further memory calls are handled by the passing the cache stack through the cache calls removing the responding cache level progressively.
 
-**View**:
-The view is structured within index.html and is separated within two partitions
+**View**: The view is structured within index.html and is separated within two partitions:
 * The left column is the control column and is responsible for allowing the user to control the cache settings, and displaying the cache statistics.
 * The right column is the visualization column and is responsible for displaying the contents within the cache simulator. There are three different views: Direct Mapped, n-Way Set Associative, and Fully Associative.
 
-**View Controller**:
-The view controller, defined in controller.js, controls connecting the TieredCache and view controls.
+**View Controller**: The view controller, defined in controller.js, controls connecting the TieredCache and view controls. The view controller is also responsible for processing any view data before being applied to the view.
 * processAddress(): Will take the current state of the addresses text field, process the field into memory references, and process the left-most address. After the address has been processed this will place the address on the end of the addresses field to allow continuous processing.
 * cacheDescription( index ): Returns the description for a given cache simulator on the provided index for the cache stack.
 * averageAccessTime(): Returns the average access time for the entire Tiered Cache.
