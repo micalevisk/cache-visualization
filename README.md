@@ -68,7 +68,7 @@ Implementation
 ==============
 **Cache Simulator**: Responsible for modeling a single level of a cache. 
 * CacheSimulator(): The prototype pattern is used to define cache simulators in the following manner: ``` var simulator = new CacheSimulator( {Cache Size}, {Block Size}, {Set Size}, {Access Time} ); ``` which will create a new cache simulator.
-* CacheSimulator.resolveRequest( address, [nextCacheLevels], [ignoreHit] ): This will do a memory request on the given cache for the provided address. If the cache evicts dirty data, or does not have the requested data then a request to the next cache level defined on the array nextCacheLevels. ignoreHit will disable the recording of a hit/miss for the request. This is used when Block Size > 1 for populating the complete block.
+* CacheSimulator.resolveRequest( address, [nextCacheLevels], [ignoreHit] ): This will do a memory request on the given cache for the provided address. If the cache evicts dirty data, or does not have the requested data, then a request to the next cache levelwill be generated. The lower cache levels are passed into this function with the nextCacheLevels optional parameter( which is expecting an array of CacheSimulators ). If ignoreHit is truthy this will disable the recording of a hit/miss for the request. This is used when Block Size > 1 for populating the complete block.
 * CacheSimulator.cacheType(): Returns the type of the cache: 0 = n-Way Set Associative, 1 = Fully Associative, 2 = Direct Mapped.
 * CacheSimulator.getAddressComponents( address ): Returns an dictionary with the following attributes: tag, offset, set, raw. Each attribute will be the correct for the cache object.
 
