@@ -19,7 +19,7 @@ Build a web-based application that allows the user to specify the
 following for an arbitrary number of cache levels:
 * Total size of cache
 * Block size (1, 2, or 4) <-- ideally an arbitrary power of 2, though
-* Direct or 2-way set associative mapping <-- higher associativity, up to
+* Direct or 2-way set associative mapping <-- higher associatively, up to
 full, is a bonus
 * (bonus) Write policy
 * (bonus) Access time (and access time for main memory)
@@ -35,11 +35,11 @@ cache. The simulation should show the hit rate of each cache. If the
 access time feature is implemented, the simulation should also show the
 average memory access time for this sequence of requests.
 
-Useage
+Usage
 ======
 On the initial launch of the simulator you will be presented with a single-level setup with only a L1 cache.
 The left column allows you to configure the simulator:
-* Address Sequence: Defines a sequence of memory addresses. You can define multiple addresses ( EX: 1, 20, 13 ) using space delimited values.
+* Address Sequence: Defines a sequence of memory addresses. You can define multiple addresses ( EX: 1, 20, 13 ) using space delimited values. Applying a 'w' either at the end or the beginning of an address will constitute as a memory write.
 * Process Address Button: Will take the left-most address in the Address Sequence and process it with the given cache.
 * Repeat Addresses and Repeat Speed: Will repeat the address sequence provided. After each address is processed the address will be placed on the end of the address sequence. This allows you to run a sequence of addresses continuously. The Repeat Speed slider controls how fast the simulator will process the addresses [ 1ms - 1000ms ]
 * Add New Cache to Stack: This will place a new cache level on the bottom of the current cache stack. 
@@ -72,7 +72,7 @@ The simulator mainly revolves around two seperate objects:
 * CacheSimulator.cacheType(): Returns the type of the cache: 0 = n-Way Set Associative, 1 = Fully Associative, 2 = Direct Mapped.
 * CacheSimulator.getAddressComponents( address ): Returns an dictionary with the following attributes: tag, offset, set, raw. Each attribute will be the correct for the cache object.
 
-* TieredCache(): Responsible for modeling a collection of cache levels. The prototype pattern is used to define tiered caches in the following manner: ``` var tieredCache = new TieredCache( initalCache, memoryAccessTime ); ``` which will define a Tiered Cache with a single L1 level. The default main memory access time, provided by memoryAccessTime, is the time penality for the entire Tiered Cache missing and having to access main memory.
+* TieredCache(): Responsible for modeling a collection of cache levels. The prototype pattern is used to define tiered caches in the following manner: ``` var tieredCache = new TieredCache( initalCache, memoryAccessTime ); ``` which will define a Tiered Cache with a single L1 level. The default main memory access time, provided by memoryAccessTime, is the time penalty for the entire Tiered Cache missing and having to access main memory.
 * TieredCache.addCacheLevel( cacheSimulator ): This will push a new cache simulator on the bottom of the Tiered Cache stack.
 * TieredCache.removeLevel( index ): Will remove a cache level at the provided stack index.
 * TieredCache.clear(): This will reset the entire Tiered Cache and each cache level.
@@ -80,7 +80,7 @@ The simulator mainly revolves around two seperate objects:
 * TieredCache.clearLevel( index ): Will clear the cache for the index on the cache stack.
 * TieredCache.resolveRequest( address ): Will attempt to resolve the memory request on the given cache stack. This will call the resolveRequest function for the first given cache on the cache stack. Further memory calls are handled by the passing the cache stack through the cache calls removing the responding cache level progressively.
 
-The view is structured within index.html and is seperated within two partitions
+The view is structured within index.html and is separated within two partitions
 * The left column is the control column and is responsible for allowing the user to control the cache settings, and displaying the cache statistics.
 * The right column is the visualization column and is responsible for displaying the contents within the cache simulator. There are three different views: Direct Mapped, n-Way Set Associative, and Fully Associative.
 
@@ -93,4 +93,4 @@ The view controller, defined in controller.js, controls connecting the TieredCac
 * clearCacheLevel( index ): Will clear and update the cache provided by the index on the cache stack.
 * initCache(): Will create a new Cache Simulator and place on the bottom of the cache stack.
 * removeCacheLevel( index ): Will remove the given cache provided by the index on the cache stack.
-* repeatAddressSequence(): This will start an interval for processing addresses or will stop the current interval. 
+* repeatAddressSequence(): This will start an interval for processing addresses or will stop the current interval.
