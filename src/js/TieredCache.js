@@ -19,9 +19,9 @@ TieredCache.prototype.addCacheLevel = function( cacheSimulator ) {
 }
 
 // Remove an arbitrary level from the cache stack 
-TieredCache.prototype.removeLevel = function( level ) {
+TieredCache.prototype.removeLevel = function( index ) {
   if( typeof this.cacheLevels[level] !== "undefined" ) {
-    this.cacheLevels.splice( level, 1 );
+    this.cacheLevels.splice( index, 1 );
   }
 }
 
@@ -65,12 +65,12 @@ TieredCache.prototype.averageAccessTime = function() {
 }
 
 // Clears and updates a single level on the cache stack
-TieredCache.prototype.clearLevel = function( level ) {
-  if( typeof this.cacheLevels[level] !== "undefined" ) {
-    var cacheSimulator = this.cacheLevels[level];
+TieredCache.prototype.clearLevel = function( index ) {
+  if( typeof this.cacheLevels[index] !== "undefined" ) {
+    var cacheSimulator = this.cacheLevels[index];
 
     // Create a new cache simulator for the block using the external variables
-    this.cacheLevels[level] = new CacheSimulator( cacheSimulator.external.cacheSize, cacheSimulator.external.blockSize, cacheSimulator.external.setSize, cacheSimulator.external.accessTime );
+    this.cacheLevels[index] = new CacheSimulator( cacheSimulator.external.cacheSize, cacheSimulator.external.blockSize, cacheSimulator.external.setSize, cacheSimulator.external.accessTime );
   }
 }
 

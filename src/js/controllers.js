@@ -104,8 +104,8 @@ app.controller('main', function($scope) {
     return result;
   };
 
-  $scope.clearCacheLevel = function( level ) {
-    $scope.tieredCache.clearLevel( level );
+  $scope.clearCacheLevel = function( index ) {
+    $scope.tieredCache.clearLevel( index );
   };
 
   $scope.clearCache = function() {
@@ -128,12 +128,12 @@ app.controller('main', function($scope) {
   };
 
 
-  $scope.removeCacheLevel = function( level ) {
+  $scope.removeCacheLevel = function( index ) {
     // Clear the repeat timer
     clearTimeout( $scope.repeatHandle );
     $scope.repeatHandle = 0;
 
-    $scope.tieredCache.removeLevel( level );
+    $scope.tieredCache.removeLevel( index );
   };
 
   // Click event for repeating the processAddress function
