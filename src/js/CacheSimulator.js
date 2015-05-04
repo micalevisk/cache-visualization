@@ -188,9 +188,12 @@ CacheSimulator.prototype.fillBlock = function( dataArray, comps, nextCacheLevels
     // ignore will get set to true which will only allow the lower level to recognize a single hit ( for hit-rate correctness )
     if( nextCacheLevels.length ) {
       var hit = nextCacheLevels[0].resolveRequest( parseInt( value, 2 ), nextCacheLevels.slice(1), ignore );
-      if( hit ) {
+
+      // Only record a hit on the first access attempt; subsequent attempts will have the data populated as a side-effect of the request
+      if( hit && i == 0 ) {
         result = hit;
       }
+
       ignore = true;
     }
   }
