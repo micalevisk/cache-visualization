@@ -39,7 +39,7 @@ Usage
 ======
 On the initial launch of the simulator you will be presented with a single-level setup with only a L1 cache.
 The left column allows you to configure the simulator:
-* Address Sequence: Defines a sequence of memory addresses. You can define multiple addresses ( EX: 1, 20, 13 ) using space delimited values. Applying a 'w' either at the end or the beginning of an address will constitute as a memory write.
+* Address Sequence: Defines a sequence of memory addresses. You can define multiple addresses ( EX: 1, 20, 13 ) using space delimited values. Applying a 'w' either at the end of an address will constitute as a memory write.
 * Process Address Button: Will take the left-most address in the Address Sequence and process it with the given cache.
 * Repeat Addresses and Repeat Speed: Will repeat the address sequence provided. After each address is processed the address will be placed on the end of the address sequence. This allows you to run a sequence of addresses continuously. The Repeat Speed slider controls how fast the simulator will process the addresses [ 1ms - 1000ms ]
 * Add New Cache to Stack: This will place a new cache level on the bottom of the current cache stack. 
